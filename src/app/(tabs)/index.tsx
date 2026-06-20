@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+
 export default function Index() {
   const [input, setInput] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [isloaded, setIsloaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const STORAGE_KEY = "todos";
   const remaining = todos.filter(todo => !todo.completed).length;
   const completed = todos.filter(todo => todo.completed).length;
   const progress = todos.length === 0 ? 0 : completed / todos.length;
   useEffect(() => { loadTodos(); }, [])
-  useEffect(() => { if (isloaded) saveTodos(); }, [todos, isloaded])
+  useEffect(() => { if (isLoaded) saveTodos(); }, [todos, isLoaded])
 
   function addTodo() {
     if (!input.trim()) return;
@@ -32,6 +33,10 @@ export default function Index() {
   function toggleTodo(id: string) {
     setTodos(prev => prev.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
   }
+  function updateTodo(id: string, newText: string){
+    if (!newText.trim()) return;
+    setTodos(prev => prev.map(todo => todo.id === id ? { ...todo, text: newText.trim() } : todo));
+  }
   function clearCompleted() {
     setTodos(prev => prev.filter(todo => !todo.completed))
   }
@@ -42,7 +47,7 @@ export default function Index() {
     } catch (error) {
       console.error("Failed to load todos:", error);
     } finally {
-      setIsloaded(true);
+      setIsLoaded(true);
     }
   }
   async function saveTodos() {
@@ -92,7 +97,7 @@ export default function Index() {
         keyExtractor={item => item.id}
         ListEmptyComponent={<Text>No tasks yet</Text>}
         renderItem={({ item }) => (
-          <ToDoItem todo={item} onDelete={deleteTodo} onToggle={toggleTodo} />
+          <ToDoItem todo={item} onDelete={deleteTodo} onToggle={toggleTodo} onUpdate={updateTodo}/>
         )}
       />
     </View>
